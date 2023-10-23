@@ -8,5 +8,8 @@ const router = express.Router();
 router.use(verifyAccessToken);
 
 router.post('/upload', upload.single('file'), FileController.uploadFile);
+router.get('/list', FileController.listFiles);
+router.delete('/delete/:id', FileController.deleteFile);
+router.get('/:id', FileController.getFile);
 
 module.exports = router;
