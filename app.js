@@ -17,7 +17,11 @@ const app = express();
 
 app.enable('trust proxy');
 app.use(morgan('dev'));
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: 'Content-Type,Authorization',
+}));
 // Set Security HTTP headers
 app.use(helmet());
 // Body parser, reading data from body into req.body
