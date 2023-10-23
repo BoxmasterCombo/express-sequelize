@@ -10,6 +10,7 @@ const sequelize = new Sequelize({
   database: config.database,
   host: config.host,
   port: config.port,
+  sync: true,
 });
 
 try {

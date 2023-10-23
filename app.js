@@ -13,10 +13,14 @@ require('./cron/cron');
 const GlobalErrorHandler = require('./controllers/error.controller');
 
 const AuthRouter = require('./routes/auth.router');
+const FileRouter = require('./routes/file.router');
 
 const app = express();
 
 app.enable('trust proxy');
+
+app.use('/uploads', express.static('uploads'));
+
 app.use(morgan('dev'));
 app.use(cors({
   origin: '*',
@@ -40,6 +44,7 @@ app.use(
 
 // Routes
 app.use('/api/v1/auth', AuthRouter);
+app.use('/api/v1/file', FileRouter);
 
 app.all('*', (req, res, next) => {
     console.log(`Can't find ${req.originalUrl} on this server!`);
