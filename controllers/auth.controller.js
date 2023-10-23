@@ -111,8 +111,8 @@ exports.logout = catchAsync(async (req, res) => {
   await RevokedTokens.create({
     accessToken,
     refreshToken,
-    accessTokenExpiresAt: decodedAccessToken.exp,
-    refreshTokenExpiresAt: decodedRefreshToken.exp,
+    accessTokenExpiresAt: new Date(decodedAccessToken.exp * 1000),
+    refreshTokenExpiresAt: new Date(decodedRefreshToken.exp * 1000),
   }).then(() => {
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
