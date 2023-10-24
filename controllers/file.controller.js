@@ -36,18 +36,6 @@ exports.listFiles = catchAsync(async (req, res) => {
   res.status(200).json(files);
 });
 
-exports.getFile = catchAsync(async (req, res) => {
-  const { id } = req.params;
-
-  const file = await File.findByPk(id);
-
-  if (!file) {
-    return res.status(404).json({ error: 'File not found' });
-  }
-
-  res.status(200).json(file);
-});
-
 exports.deleteFile = catchAsync(async (req, res) => {
   const { id } = req.params;
 
@@ -64,4 +52,66 @@ exports.deleteFile = catchAsync(async (req, res) => {
   res.status(204).json({
     message: 'File deleted successfully',
   });
+});
+
+exports.getFile = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const file = await File.findByPk(id);
+
+  if (!file) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+
+  res.status(200).json(file);
+});
+
+exports.downloadFile = catchAsync(async (req, res) => {
+  const fileId = req.params.id;
+
+  // Retrieve file information from the database based on the ID
+  const file = await File.findByPk(fileId);
+
+  if (!file) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+
+  const filePath = 'uploads/' + file.filename;
+
+  res.setHeader('Content-Type', file.mimeType);
+  res.setHeader('Content-Disposition', `attachment; filename="${file.name}.${file.extension}"`);
+
+  const fileStream = fs.createReadStream(filePath);
+  fileStream.pipe(res);
+});
+
+exports.updateFile = catchAsync(async (req, res) => {
+  const fileId = req.params.id;
+
+  if (!req.file) {
+    res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  // Retrieve file information from the database based on the ID
+  const file = await File.findByPk(fileId);
+
+  if (!file) {
+   res.status(404).json({ error: 'File not found' });
+  }
+
+  // Remove the existing document from local storage
+  const existingFilePath = 'uploads/' + file.filename;
+  fs.existsSync(existingFilePath) && fs.unlinkSync(existingFilePath);
+
+  // Update the database entry with new file details
+  const { originalname, mimetype, size, filename } = req.file;
+  file.name = originalname;
+  file.extension = mime.extension(mimetype);
+  file.mimeType = mimetype;
+  file.size = size;
+  file.filename = filename;
+
+  await file.save();
+
+  res.status(200).json(file);
 });

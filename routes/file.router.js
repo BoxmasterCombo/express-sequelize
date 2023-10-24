@@ -11,5 +11,7 @@ router.post('/upload', upload.single('file'), FileController.uploadFile);
 router.get('/list', FileController.listFiles);
 router.delete('/delete/:id', FileController.deleteFile);
 router.get('/:id', FileController.getFile);
+router.get('/download/:id', FileController.downloadFile);
+router.put('/update/:id', upload.single('file'), FileController.updateFile);
 
 module.exports = router;
