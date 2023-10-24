@@ -1,12 +1,13 @@
 const catchAsync = require('../utils/catchAsync');
 const jwt = require('jsonwebtoken');
 const { RevokedTokens } = require('../db');
+const AppError = require("../utils/appError");
 
 // This is a protected route
 module.exports = catchAsync(async (req, res, next) => {
   const accessToken = req.cookies.accessToken;
   if (!accessToken) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return next(new AppError('Please login', 401));
   }
 
   // Check if token has been revoked
@@ -15,12 +16,12 @@ module.exports = catchAsync(async (req, res, next) => {
   });
 
   if (revokedTokens) {
-    return res.status(401).json({ error: 'Token has already been revoked' });
+    return next(new AppError('Token has already been revoked', 401));
   }
 
   jwt.verify(accessToken, process.env.JWT_ACCESS_TOKEN_SECRET, (err, user) => {
     if (err) {
-      return res.status(403).json({ error: 'Invalid token' });
+      return next(new AppError('Invalid token', 401));
     }
 
     req.user = user;

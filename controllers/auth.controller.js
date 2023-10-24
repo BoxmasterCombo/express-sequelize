@@ -23,11 +23,11 @@ exports.signUp = catchAsync(async (req, res, next) => {
   // Hash the password before saving it to the database
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  await User.create({ id, password: hashedPassword });
+  const newUser = await User.create({ id, password: hashedPassword });
 
   // Generate and set access and refresh tokens as cookies
-  const accessToken = createAccessToken(user);
-  const refreshToken = createRefreshToken(user);
+  const accessToken = createAccessToken(newUser);
+  const refreshToken = createRefreshToken(newUser);
 
   res.cookie('accessToken', accessToken, { httpOnly: true });
   res.cookie('refreshToken', refreshToken, { httpOnly: true });
