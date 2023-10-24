@@ -107,11 +107,14 @@ exports.updateFile = catchAsync(async (req, res, next) => {
 
   // Update the database entry with new file details
   const { originalname, mimetype, size, filename } = req.file;
-  file.name = originalname;
-  file.extension = mime.extension(mimetype);
-  file.mimeType = mimetype;
-  file.size = size;
-  file.filename = filename;
+
+  Object.assign(file, {
+    name: originalname,
+    extension: mime.extension(mimetype),
+    mimeType: mimetype,
+    size,
+    filename,
+  });
 
   await file.save();
 
