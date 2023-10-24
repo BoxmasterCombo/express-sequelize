@@ -91,7 +91,6 @@ exports.updateFile = catchAsync(async (req, res, next) => {
   const fileId = req.params.id;
 
   if (!req.file) {
-    // res.status(400).json({ error: 'No file uploaded' });
     return next(new AppError('No file uploaded', 400));
   }
 
