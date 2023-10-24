@@ -11,7 +11,7 @@ module.exports = catchAsync(async (req, res, next) => {
   }
 
   // Check if token has been revoked
-  const revokedTokens = await RevokedTokens.findOne({
+  const revokedTokens = await RevokedTokens.count({
     where: { accessToken },
   });
 
