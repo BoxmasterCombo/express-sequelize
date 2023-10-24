@@ -11,6 +11,7 @@ const sequelize = new Sequelize({
   host: config.host,
   port: config.port,
   sync: true,
+  logging: process.env.NODE_ENV === 'development' ? console.log : false,
 });
 
 try {

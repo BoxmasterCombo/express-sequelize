@@ -3,10 +3,11 @@ const path = require('path');
 const mime = require('mime-types');
 const catchAsync = require('../utils/catchAsync');
 const { File } = require('../db');
+const AppError = require("../utils/appError");
 
-exports.uploadFile = catchAsync(async (req, res) => {
+exports.uploadFile = catchAsync(async (req, res, next) => {
   if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
+    return next(new AppError('No file uploaded', 400));
   }
 
   // Extract file details
@@ -36,44 +37,45 @@ exports.listFiles = catchAsync(async (req, res) => {
   res.status(200).json(files);
 });
 
-exports.deleteFile = catchAsync(async (req, res) => {
+exports.deleteFile = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const file = await File.findByPk(id);
 
   if (!file) {
-    return res.status(404).json({ error: 'File not found' });
+    return next(new AppError('File not found', 404));
   }
 
   await file.destroy();
 
-  fs.unlinkSync(path.join(__dirname, `../uploads/${file.filename}`));
+  const existingFilePath = path.join(__dirname, `../uploads/${file.filename}`);
+  fs.existsSync(existingFilePath) && fs.unlinkSync(path.join(__dirname, `../uploads/${file.filename}`));
 
   res.status(204).json({
     message: 'File deleted successfully',
   });
 });
 
-exports.getFile = catchAsync(async (req, res) => {
+exports.getFile = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const file = await File.findByPk(id);
 
   if (!file) {
-    return res.status(404).json({ error: 'File not found' });
+    return next(new AppError('File not found', 404));
   }
 
   res.status(200).json(file);
 });
 
-exports.downloadFile = catchAsync(async (req, res) => {
+exports.downloadFile = catchAsync(async (req, res, next) => {
   const fileId = req.params.id;
 
   // Retrieve file information from the database based on the ID
   const file = await File.findByPk(fileId);
 
   if (!file) {
-    return res.status(404).json({ error: 'File not found' });
+    return next(new AppError('File not found', 404));
   }
 
   const filePath = 'uploads/' + file.filename;
@@ -85,18 +87,19 @@ exports.downloadFile = catchAsync(async (req, res) => {
   fileStream.pipe(res);
 });
 
-exports.updateFile = catchAsync(async (req, res) => {
+exports.updateFile = catchAsync(async (req, res, next) => {
   const fileId = req.params.id;
 
   if (!req.file) {
-    res.status(400).json({ error: 'No file uploaded' });
+    // res.status(400).json({ error: 'No file uploaded' });
+    return next(new AppError('No file uploaded', 400));
   }
 
   // Retrieve file information from the database based on the ID
   const file = await File.findByPk(fileId);
 
   if (!file) {
-   res.status(404).json({ error: 'File not found' });
+   return next(new AppError('File not found', 404));
   }
 
   // Remove the existing document from local storage

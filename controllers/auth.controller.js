@@ -70,16 +70,16 @@ exports.signIn = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.newToken = catchAsync(async (req, res) => {
+exports.newToken = catchAsync(async (req, res, next) => {
   const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
-    return res.status(401).json({ error: 'No refresh token provided' });
+    return next(new AppError('No refresh token provided', 401));
   }
 
   jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, (err, user) => {
     if (err) {
-      return res.status(403).json({ error: 'Invalid refresh token' });
+      return next(new AppError('Invalid refresh token', 403));
     }
 
     // Generate and set access and refresh tokens as cookies
@@ -96,13 +96,13 @@ exports.newToken = catchAsync(async (req, res) => {
   });
 });
 
-exports.getInfo = catchAsync(async (req, res) => {
+exports.getInfo = catchAsync(async (req, res, next) => {
   return res.status(200).json({
     id: req.user.id,
   });
 });
 
-exports.logout = catchAsync(async (req, res) => {
+exports.logout = catchAsync(async (req, res, next) => {
   const { accessToken, refreshToken } = req.cookies;
 
   const decodedAccessToken = jwt.decode(accessToken);
@@ -120,6 +120,6 @@ exports.logout = catchAsync(async (req, res) => {
     res.status(200).json({ message: 'Logged out successfully' });
   }).catch((err) => {
     console.log(err);
-    return res.status(500).json({ error: 'Unable to logout' });
+    return next(new AppError('Unable to logout', 500));
   });
 });
