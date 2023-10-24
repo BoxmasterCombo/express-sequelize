@@ -8,7 +8,7 @@ const cors = require('cors');
 
 // Initialize database
 require('./db');
-require('./cron/cron');
+require('./cron');
 
 const GlobalErrorHandler = require('./controllers/error.controller');
 
